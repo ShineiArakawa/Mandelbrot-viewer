@@ -3,6 +3,7 @@ out
 .cache
 .hypothesis
 .vscode
+.png
 
 # Prerequisites
 *.d
