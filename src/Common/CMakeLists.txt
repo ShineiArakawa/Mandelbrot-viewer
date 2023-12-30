@@ -4,6 +4,7 @@ add_library(
     ${PROJECT_NAME}
     STATIC
     "GUI.cpp"
+    "FileUtil.cpp"
 )
 
 target_include_directories(

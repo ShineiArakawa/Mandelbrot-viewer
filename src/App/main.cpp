@@ -1,5 +1,6 @@
 #include <App/main.hpp>
 #include <Mandelbrot/model.hpp>
+#include <common/FIleUtil.hpp>
 #include <common/GUI.hpp>
 
 static bool isDragging = false;
@@ -11,6 +12,67 @@ ImVec2 newRangeX;
 ImVec2 newRangeY;
 
 int main(int argc, char** argv) {
+  // Parse args
+  argparse::ArgumentParser program("Mandelbrot-viewer");
+
+  program.add_argument("--offline").default_value(false);
+  program.add_argument("--minX").default_value(-2.0);
+  program.add_argument("--maxX").default_value(2.0);
+  program.add_argument("--minY").default_value(-2.0);
+  program.add_argument("--maxY").default_value(2.0);
+  program.add_argument("--nFrames").default_value(1000);
+  program.add_argument("--delta").default_value(0.1);
+  program.add_argument("--saveDir").default_value("");
+
+  try {
+    program.parse_args(argc, argv);
+  } catch (const std::exception& err) {
+    std::cerr << err.what() << std::endl;
+    std::cerr << program;
+    std::exit(1);
+  }
+
+  int returnState = 1;
+  if (program["--offline"] == true) {
+    returnState = offlineRender(program);
+  } else {
+    returnState = launchWindow();
+  }
+
+  return 0;
+}
+
+int offlineRender(argparse::ArgumentParser& parser) {
+  std::cout << "Start offline rendering" << std::endl;
+
+  auto mandelbrotModel = std::make_shared<mandel::model::MandelbrotModel>(true);
+
+  mandelbrotModel->minX = parser.get<double>("minX");
+  mandelbrotModel->maxX = parser.get<double>("maxX");
+  mandelbrotModel->minY = parser.get<double>("minY");
+  mandelbrotModel->maxY = parser.get<double>("maxY");
+  const int nFrames = parser.get<int>("nFrames");
+  const double delta = parser.get<double>("delta");
+  const std::string saveDir = mandel::fs::FileUtil::absPath(parser.get<std::string>("saveDir"));
+
+  for (int iFrame = 0; iFrame < nFrames; iFrame++) {
+    double bandwidthX = mandelbrotModel->maxX - mandelbrotModel->minX;
+    double bandwidthY = mandelbrotModel->maxY - mandelbrotModel->minY;
+    mandelbrotModel->minX = mandelbrotModel->minX + bandwidthX * delta;
+    mandelbrotModel->maxX = mandelbrotModel->maxX - bandwidthX * delta;
+    mandelbrotModel->minY = mandelbrotModel->minY + bandwidthY * delta;
+    mandelbrotModel->maxY = mandelbrotModel->maxY - bandwidthY * delta;
+
+    mandelbrotModel->update();
+
+    std::string filePath = mandel::fs::FileUtil::join(saveDir, std::to_string(iFrame) + ".png");
+    mandel::GUI::saveImage(mandelbrotModel->TEXTURE_BUFFER_WIDTH, mandelbrotModel->TEXTURE_BUFFER_HEIGHT, 4, mandelbrotModel->bytePixelsBuffer, filePath);
+  }
+
+  return 0;
+}
+
+int launchWindow() {
   if (glfwInit() == GLFW_FALSE) {
     fprintf(stderr, "Initialization failed!\n");
     return 1;
@@ -94,6 +156,8 @@ int main(int argc, char** argv) {
             ImGui::Checkbox("Smoothing", &mandelbrotModel->isEnabledSmoothing);
             ImGui::Checkbox("Sinusoidal Color", &mandelbrotModel->isEnabledSinuidalColor);
             ImGui::InputDouble("Density", &mandelbrotModel->density);
+            ImGui::Checkbox("Super Sample", &mandelbrotModel->isEnabledSuperSampling);
+            ImGui::InputInt("Super Sample Factor", &mandelbrotModel->superSampleFactor);
             ImGui::EndTabItem();
           }
 

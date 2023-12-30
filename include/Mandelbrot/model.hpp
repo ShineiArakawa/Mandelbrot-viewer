@@ -20,7 +20,7 @@ class MandelbrotModel {
   std::shared_ptr<mandel::GUI::TextureBuffer> _textureBuffer = nullptr;
 
  public:
-  MandelbrotModel();
+  MandelbrotModel(bool offlineMode_ = false);
   ~MandelbrotModel();
 
   inline static const double LOG2 = std::log(2);
@@ -37,6 +37,10 @@ class MandelbrotModel {
   double density = 0.35;
   bool isEnabledSmoothing = false;
   bool isEnabledSinuidalColor = false;
+  bool isEnabledSuperSampling = false;
+  int superSampleFactor = 1;
+  bool offlineMode = false;
+  unsigned char* bytePixelsBuffer = (unsigned char*)calloc(sizeof(unsigned char), TEXTURE_BUFFER_WIDTH* TEXTURE_BUFFER_HEIGHT * 4);
 
   // Rendering
   void update();
@@ -45,7 +49,6 @@ class MandelbrotModel {
 
   // Mandelbrot calculation
   std::vector<double> arrange(const double, const double, const int);
-  int isIncluded(std::complex<double>, const int, const double);
 };
 }  // namespace model
 }  // namespace mandel

@@ -69,6 +69,9 @@ set(
 # #### stb
 set(STB_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/stb)
 
+# #### stb
+set(ARGPARSE_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/argparse/include)
+
 # #### Add subdirectory
 add_subdirectory("src")
 add_subdirectory("external")
@@ -102,4 +105,5 @@ message("#    IMGUI_INCLUDE_DIR        : ${IMGUI_INCLUDE_DIR}")
 message("#    IMGUI_SOURCE_DIR         : ${IMGUI_SOURCE_DIR}")
 message("#    IMGUI_BACKENDS_DIR       : ${IMGUI_BACKENDS_DIR}")
 message("#    STB_INCLUDE_DIR          : ${STB_INCLUDE_DIR}")
+message("#    ARGPARSE_INCLUDE_DIR     : ${ARGPARSE_INCLUDE_DIR}")
 message("# =======================================================================================================")

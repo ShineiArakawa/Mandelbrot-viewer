@@ -18,6 +18,7 @@ target_include_directories(
     ${GLM_INCLUDE_DIR}
     ${IMGUI_INCLUDE_DIR}
     ${STB_INCLUDE_DIR}
+    ${ARGPARSE_INCLUDE_DIR}
 )
 
 target_link_libraries(

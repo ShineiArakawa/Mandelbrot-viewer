@@ -3,8 +3,11 @@
 namespace mandel {
 namespace model {
 static int counter = 0;
-MandelbrotModel::MandelbrotModel() {
-  _textureBuffer = std::make_shared<mandel::GUI::TextureBuffer>(TEXTURE_BUFFER_WIDTH, TEXTURE_BUFFER_HEIGHT);
+MandelbrotModel::MandelbrotModel(bool offlineMode_) {
+  offlineMode = offlineMode_;
+  if (!offlineMode) {
+    _textureBuffer = std::make_shared<mandel::GUI::TextureBuffer>(TEXTURE_BUFFER_WIDTH, TEXTURE_BUFFER_HEIGHT);
+  }
 }
 
 MandelbrotModel::~MandelbrotModel() {
@@ -13,13 +16,12 @@ MandelbrotModel::~MandelbrotModel() {
 void MandelbrotModel::update() {
   auto xCoords = arrange(minX, maxX, TEXTURE_BUFFER_WIDTH);
   auto yCoords = arrange(minY, maxY, TEXTURE_BUFFER_HEIGHT);
-  auto bytePixels = (unsigned char*)calloc(sizeof(unsigned char), TEXTURE_BUFFER_WIDTH * TEXTURE_BUFFER_HEIGHT * 4);
 
 #pragma omp parallel for
   for (int x = 0; x < (int)TEXTURE_BUFFER_WIDTH; x++) {
 #pragma omp parallel for
     for (int y = 0; y < (int)TEXTURE_BUFFER_HEIGHT; y++) {
-      std::complex<double> coord(xCoords[x], yCoords[y]);
+      const std::complex<double> coord(xCoords[x], yCoords[y]);
       std::complex<double> z(0.0, 0.0);
 
       int stoppedIter = 0;
@@ -53,9 +55,9 @@ void MandelbrotModel::update() {
           alpha = alpha * density;
           alpha = std::log(alpha + 1.0);
 
-          double factorR = (std::cos((alpha * 2.0 - 1.0) * MY_PI) + 1.0) * 0.5;
-          double factorG = (std::cos((alpha * 2.0 - 0.75) * MY_PI) + 1.0) * 0.5;
-          double factorB = (std::cos((alpha * 2.0 - 0.5) * MY_PI) + 1.0) * 0.5;
+          const double factorR = (std::cos((alpha * 2.0 - 1.0) * MY_PI) + 1.0) * 0.5;
+          const double factorG = (std::cos((alpha * 2.0 - 0.75) * MY_PI) + 1.0) * 0.5;
+          const double factorB = (std::cos((alpha * 2.0 - 0.5) * MY_PI) + 1.0) * 0.5;
 
           R = (int)(factorR * 255.0);
           G = (int)(factorG * 255.0);
@@ -69,17 +71,20 @@ void MandelbrotModel::update() {
           A = 255;
         }
 
-        bytePixels[index] = R;
-        bytePixels[index + 1] = G;
-        bytePixels[index + 2] = B;
-        bytePixels[index + 3] = A;
+        bytePixelsBuffer[index] = R;
+        bytePixelsBuffer[index + 1] = G;
+        bytePixelsBuffer[index + 2] = B;
+        bytePixelsBuffer[index + 3] = A;
       }
     }
   }
 
-  _textureBuffer->updateBuffer(bytePixels);
-  std::cout << "Update !" << std::endl;
+  if (!offlineMode) {
+    _textureBuffer->updateBuffer(bytePixelsBuffer);
+  }
+  // std::cout << "Update !" << std::endl;
 }
+
 std::vector<double> MandelbrotModel::arrange(const double min, const double max, const int length) {
   std::vector<double> array;
   const double stride = (max - min) / (double)(length - 1);
@@ -88,19 +93,6 @@ std::vector<double> MandelbrotModel::arrange(const double min, const double max,
     array.push_back(value);
   }
   return array;
-}
-
-int MandelbrotModel::isIncluded(std::complex<double> coord, const int maxIter, const double threshold) {
-  std::complex<double> z(0.0, 0.0);
-  for (int i = 0; i < maxIter; i++) {
-    if (std::abs(z) > threshold) {
-      return i;
-    }
-
-    z = z * z + coord;
-  }
-
-  return -1;
 }
 
 }  // namespace model

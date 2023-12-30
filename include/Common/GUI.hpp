@@ -53,6 +53,7 @@ class TextureBuffer {
 };
 
 unsigned char* loadTexture(const std::string& filePath, int& texWidth, int& texHeight);
+void saveImage(const int width, const int height, const int channels, unsigned char* bytes, const std::string filePath);
 
 }  // namespace GUI
 }  // namespace mandel
