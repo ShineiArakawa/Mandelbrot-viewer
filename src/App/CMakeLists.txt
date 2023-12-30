@@ -30,12 +30,12 @@ target_link_libraries(
     OpenGL::GLU
 )
 
-if(UNIX)
-    target_link_libraries(
-        ${EXE_PROJECT_NAME}
-        X11
-    )
-endif(UNIX)
+# if(UNIX)
+#     target_link_libraries(
+#         ${EXE_PROJECT_NAME}
+#         X11
+#     )
+# endif(UNIX)
 
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
