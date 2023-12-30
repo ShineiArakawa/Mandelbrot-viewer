@@ -10,3 +10,7 @@
 [submodule "external/argparse"]
 	path = external/argparse
 	url = https://github.com/p-ranav/argparse.git
+[submodule "external/imgui"]
+	path = external/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
