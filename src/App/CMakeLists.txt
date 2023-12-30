@@ -28,15 +28,15 @@ target_link_libraries(
     glfw
     OpenGL::GL
     OpenGL::GLU
+    stdc++fs
 )
 
 # if(UNIX)
-#     target_link_libraries(
-#         ${EXE_PROJECT_NAME}
-#         X11
-#     )
+# target_link_libraries(
+# ${EXE_PROJECT_NAME}
+# X11
+# )
 # endif(UNIX)
-
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${CMAKE_SOURCE_DIR}/bin/

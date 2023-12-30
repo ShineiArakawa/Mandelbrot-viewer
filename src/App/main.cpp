@@ -1,7 +1,7 @@
 #include <App/main.hpp>
+#include <Common/FileUtil.hpp>
+#include <Common/GUI.hpp>
 #include <Mandelbrot/model.hpp>
-#include <common/FIleUtil.hpp>
-#include <common/GUI.hpp>
 
 static bool isDragging = false;
 ImVec2 oldPos;
