@@ -16,12 +16,12 @@ int main(int argc, char** argv) {
   argparse::ArgumentParser program("Mandelbrot-viewer");
 
   program.add_argument("--offline").default_value(false).implicit_value(true);
-  program.add_argument("--minX").default_value(-2.0).scan<'i', double>();
-  program.add_argument("--maxX").default_value(2.0).scan<'i', double>();
-  program.add_argument("--minY").default_value(-2.0).scan<'i', double>();
-  program.add_argument("--maxY").default_value(2.0).scan<'i', double>();
+  program.add_argument("--minX").default_value(-2.0).scan<'g', double>();
+  program.add_argument("--maxX").default_value(2.0).scan<'g', double>();
+  program.add_argument("--minY").default_value(-2.0).scan<'g', double>();
+  program.add_argument("--maxY").default_value(2.0).scan<'g', double>();
   program.add_argument("--nFrames").default_value(1000).scan<'i', int>();
-  program.add_argument("--delta").default_value(0.1).scan<'i', double>();
+  program.add_argument("--delta").default_value(0.1).scan<'g', double>();
   program.add_argument("--saveDir").default_value("");
 
   try {
