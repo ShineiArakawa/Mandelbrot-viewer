@@ -33,6 +33,7 @@ void TextureBuffer::initTexture(const int width, const int height, unsigned char
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);  // Same
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytesTexture);
+  CUDA_CHECK_ERROR(cudaGraphicsGLRegisterImage(&_deviceResource, _texture, GL_TEXTURE_2D, cudaGraphicsRegisterFlagsWriteDiscard));
 
   stbi_image_free(bytesTexture);
 
@@ -46,6 +47,10 @@ TextureBuffer::~TextureBuffer() {
 
 void TextureBuffer::updateBuffer(unsigned char* bytePixels) {
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, bytePixels);
+}
+
+cudaGraphicsResource* TextureBuffer::getDeviceResource() {
+  return _deviceResource;
 }
 
 unsigned int TextureBuffer::getTextureID() {

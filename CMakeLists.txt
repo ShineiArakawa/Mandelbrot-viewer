@@ -4,11 +4,14 @@ project(Mandelbrot-viewer)
 # #################################################
 # #### Compile Options ############################
 # #################################################
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-std=c++17")
+set(CMAKE_CUDA_FLAGS "-arch=sm_86")
 
 if(UNIX)
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall")
+  set(CMAKE_CUDA_FLAGS_DEBUG "-g -O0 -Wall")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+  set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG")
 elseif(WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "-Wall")
   set(CMAKE_CXX_FLAGS_RELEASE "/O2 -DNDEBUG")
@@ -24,6 +27,9 @@ set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/external)
 # #################################################
 # #### External Libraries #########################
 # #################################################
+# #### CUDA Toolkit
+find_package(CUDAToolkit REQUIRED)
+
 # #### OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -89,6 +95,14 @@ message("# ")
 message("#  [C/C++]")
 message("#    C++ Compiler             : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} ${CMAKE_CXX_COMPILER_WRAPPER} ${CMAKE_CXX_COMPILER}")
 message("#    CXX STANDARD             : ${CMAKE_CXX_STANDARD}")
+message("# ")
+message("#  [CUDA]")
+message("#    CUDA compiler ID         : ${CMAKE_CUDA_COMPILER_ID}")
+message("#    CUDA compiler Version    : ${CMAKE_CUDA_COMPILER_VERSION}")
+message("#    CUDA CXX STANDARD        : ${CMAKE_CUDA_STANDARD}")
+message("#    CUDA Compiler            : ${CMAKE_CUDA_COMPILER}")
+message("#    CUDA Compiler exec       : ${CUDA_NVCC_EXECUTABLE}")
+message("#    CUDA Compile flags       : ${CMAKE_CUDA_FLAGS}")
 message("# ")
 message("#  [OpenMP]")
 message("#    OpenMP_C_FLAGS           : ${OpenMP_C_FLAGS}")

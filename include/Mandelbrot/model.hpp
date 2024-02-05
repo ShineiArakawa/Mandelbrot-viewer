@@ -6,6 +6,7 @@
 #include <omp.h>
 
 #include <Common/GUI.hpp>
+#include <Mandelbrot/kernel.cuh>
 #include <algorithm>
 #include <complex>
 #include <iostream>

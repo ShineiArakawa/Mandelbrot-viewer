@@ -1,4 +1,4 @@
-#include <App/main.hpp>
+#include <App/GUI/GUIMain.hpp>
 #include <Common/FileUtil.hpp>
 #include <Common/GUI.hpp>
 #include <Mandelbrot/model.hpp>

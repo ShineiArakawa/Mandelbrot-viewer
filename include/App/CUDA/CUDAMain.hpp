@@ -1,5 +1,5 @@
 #pragma once
-#ifndef __INCLUDE_MAIN_HPP__
+#ifndef __INCLUDE_CUDA_MAIN_HPP__
 
 #include <argparse/argparse.hpp>
 #include <iostream>
@@ -17,5 +17,5 @@ inline static const float MOUSE_WHEEL_DELTA = 0.1;
 int offlineRender(argparse::ArgumentParser&);
 int launchWindow();
 
-#define __INCLUDE_MAIN_HPP__
+#define __INCLUDE_CUDA_MAIN_HPP__
 #endif

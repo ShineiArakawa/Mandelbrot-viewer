@@ -1,13 +1,14 @@
-project(MandelbrotModel LANGUAGES CXX CUDA)
+project(MandelbrotCUDA LANGUAGES CXX CUDA)
 
-set(LIB_PROJECT_NAME MandelbrotModelKernel)
+set(LIB_PROJECT_NAME MandelbrotCUDA_kernel)
+set(EXE_PROJECT_NAME MandelbrotCUDA_exe)
 
 ############################## CUDA Kernel ##############################
 add_library(
     ${LIB_PROJECT_NAME}
     STATIC
     "kernel.cu"
-    ${PROJECT_INCLUDE_DIR}/Mandelbrot/kernel.cuh
+    ${PROJECT_INCLUDE_DIR}/App/CUDA/kernel.cuh
 )
 
 target_include_directories(
@@ -20,7 +21,6 @@ target_include_directories(
     ${IMGUI_INCLUDE_DIR}
     ${STB_INCLUDE_DIR}
     ${ARGPARSE_INCLUDE_DIR}
-    ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
 )
 
 target_compile_options(${LIB_PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-gencode arch=compute_86,code=sm_86>)
@@ -35,14 +35,15 @@ set_target_properties(
 )
 
 # ############################# Executable C++ ##############################
-add_library(
-    ${PROJECT_NAME}
-    STATIC
-    "model.cpp"
+add_executable(
+    ${EXE_PROJECT_NAME}
+    "main.cpp"
+    ${IMGUI_SOURCE_FILES}
+    $<TARGET_OBJECTS:${LIB_PROJECT_NAME}>
 )
 
 target_include_directories(
-    ${PROJECT_NAME}
+    ${EXE_PROJECT_NAME}
     PUBLIC
     ${PROJECT_INCLUDE_DIR}
     ${GLAD_INCLUDE_DIR}
@@ -50,16 +51,32 @@ target_include_directories(
     ${GLM_INCLUDE_DIR}
     ${IMGUI_INCLUDE_DIR}
     ${STB_INCLUDE_DIR}
+    ${ARGPARSE_INCLUDE_DIR}
     ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-gencode arch=compute_86,code=sm_86>)
+target_link_libraries(
+    ${EXE_PROJECT_NAME}
+    PUBLIC
+    glad
+    glfw
+    OpenGL::GL
+    OpenGL::GLU
+    stdc++fs
+)
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+target_compile_options(${EXE_PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-gencode arch=compute_86,code=sm_86>)
+
+target_compile_features(${EXE_PROJECT_NAME} PUBLIC cxx_std_17)
 
 set_target_properties(
-    ${PROJECT_NAME}
+    ${EXE_PROJECT_NAME}
     PROPERTIES
     CUDA_SEPARABLE_COMPILATION
     ON
+)
+
+add_custom_command(
+    TARGET ${EXE_PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_PROJECT_NAME}> ${CMAKE_SOURCE_DIR}/bin/
 )

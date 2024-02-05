@@ -26,6 +26,7 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
+#include <Common/CUDA.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -39,12 +40,14 @@ class TextureBuffer {
   float _height;
 
   GLuint _texture;
+  cudaGraphicsResource* _deviceResource;
 
  public:
   TextureBuffer(const int, const int);
   TextureBuffer(std::string);
   TextureBuffer(const int, const int, unsigned char*);
   ~TextureBuffer();
+  cudaGraphicsResource* getDeviceResource();
   unsigned int getTextureID();
   void initTexture(const int width, const int height, unsigned char* bytesTexture);
   void updateBuffer(unsigned char*);
