@@ -13,6 +13,7 @@ __global__ void kernel(
     const bool isEnabledSmoothing,
     const double alphaCoeff,
     const bool isEnabledSinuidalColor,
+    const bool isEnabledSuperSampling,
     const double density) {
   const int indexX = threadIdx.x + blockIdx.x * blockDim.x;
   const int indexY = threadIdx.y + blockIdx.y * blockDim.y;
@@ -21,57 +22,99 @@ __global__ void kernel(
   if (indexX < width && indexY < height) {
     const double dX = (maxX - minX) / (double)(width - 1);
     const double dY = (maxY - minY) / (double)(height - 1);
-    const double coordX = (double)indexX * dX + minX;
-    const double coordY = (double)indexY * dY + minY;
+    const double centerCoordX = (double)indexX * dX + minX;
+    const double centerCoordY = (double)indexY * dY + minY;
 
-    double zReal = 0.0;
-    double zImag = 0.0;
     int stoppedIter = 0;
     double radius = 0.0;
+    if (isEnabledSuperSampling) {
+      const double offsetX = dX / 4.0;
+      const double offsetY = dY / 4.0;
 
-    for (int iter = 0; iter < maxIter; iter++) {
-      radius = sqrt(zReal * zReal + zImag * zImag);
+      for (int superSampleX = 0; superSampleX < 2; superSampleX++) {
+        for (int superSampleY = 0; superSampleY < 2; superSampleY++) {
+          const double coordX = (double)superSampleX * 2.0 * offsetX + centerCoordX - offsetX;
+          const double coordY = (double)superSampleY * 2.0 * offsetY + centerCoordY - offsetY;
 
-      if (radius > threshold) {
-        stoppedIter = iter;
-        break;
+          double iRadius = 0.0;
+          int iStoppedIter = 0;
+          double zReal = 0.0;
+          double zImag = 0.0;
+
+          for (int iter = 0; iter < maxIter; iter++) {
+            iRadius = sqrt(zReal * zReal + zImag * zImag);
+
+            if (iRadius > threshold) {
+              iStoppedIter = iter;
+              break;
+            }
+
+            const double tmp_zReal = zReal * zReal - zImag * zImag + coordX;
+            const double tmp_zImag = 2.0 * zReal * zImag + coordY;
+            zReal = tmp_zReal;
+            zImag = tmp_zImag;
+          }
+
+          radius += iRadius;
+          stoppedIter += iStoppedIter;
+        }
       }
 
-      const double tmp_zReal = zReal * zReal - zImag * zImag + coordX;
-      const double tmp_zImag = 2.0 * zReal * zImag + coordY;
-      zReal = tmp_zReal;
-      zImag = tmp_zImag;
+      radius /= 4.0;
+      stoppedIter /= 4;
+    } else {
+      double zReal = 0.0;
+      double zImag = 0.0;
+
+      for (int iter = 0; iter < maxIter; iter++) {
+        radius = sqrt(zReal * zReal + zImag * zImag);
+
+        if (radius > threshold) {
+          stoppedIter = iter;
+          break;
+        }
+
+        const double tmp_zReal = zReal * zReal - zImag * zImag + centerCoordX;
+        const double tmp_zImag = 2.0 * zReal * zImag + centerCoordY;
+        zReal = tmp_zReal;
+        zImag = tmp_zImag;
+      }
     }
 
     int R, G, B, A = 0;
     double alpha = 0.0;
 
-    if (isEnabledSmoothing) {
-      const double log2Val = log(2.0);
-      const double nu = log(log(radius) / log2Val) / log2Val;
-      alpha = alphaCoeff * ((double)stoppedIter + 1.0 - nu);
-    } else {
-      alpha = alphaCoeff * (double)stoppedIter;
-    }
+    if (radius > threshold) {
+      if (isEnabledSmoothing) {
+        // Smoothing
+        const double log2Val = log(2.0);
+        const double nu = log(log(radius) / log2Val) / log2Val;
+        alpha = alphaCoeff * ((double)stoppedIter + 1.0 - nu);
+      } else {
+        alpha = alphaCoeff * (double)stoppedIter;
+      }
 
-    if (isEnabledSinuidalColor) {
-      alpha = alpha * density;
-      alpha = log(alpha + 1.0);
+      if (isEnabledSinuidalColor) {
+        // Color grading
+        alpha = alpha * density;
+        alpha = log(alpha + 1.0);
 
-      const double factorR = (cos((alpha * 2.0 - 1.0) * M_PI) + 1.0) * 0.5;
-      const double factorG = (cos((alpha * 2.0 - 0.75) * M_PI) + 1.0) * 0.5;
-      const double factorB = (cos((alpha * 2.0 - 0.5) * M_PI) + 1.0) * 0.5;
+        const double factorR = (cos((alpha * 2.0 - 1.0) * M_PI) + 1.0) * 0.5;
+        const double factorG = (cos((alpha * 2.0 - 0.75) * M_PI) + 1.0) * 0.5;
+        const double factorB = (cos((alpha * 2.0 - 0.5) * M_PI) + 1.0) * 0.5;
 
-      R = (int)(factorR * 255.0);
-      G = (int)(factorG * 255.0);
-      B = (int)(factorB * 255.0);
-      A = 255;
-    } else {
-      const int pixelValue = max(min((int)(alpha * 255.0), 255), 0);
-      R = pixelValue;
-      G = pixelValue;
-      B = pixelValue;
-      A = 255;
+        R = (int)(factorR * 255.0);
+        G = (int)(factorG * 255.0);
+        B = (int)(factorB * 255.0);
+        A = 255;
+      } else {
+        alpha = max(min(alpha, 1.0), 0.0);
+        const int pixelValue = max(min((int)(alpha * 255.0), 255), 0);
+        R = pixelValue;
+        G = pixelValue;
+        B = pixelValue;
+        A = 255;
+      }
     }
 
     deviceArray[offset].x = R;
@@ -94,6 +137,7 @@ void launchCUDAKernel(
     const bool isEnabledSmoothing,
     const double alphaCoeff,
     const bool isEnabledSinuidalColor,
+    const bool isEnabledSuperSampling,
     const double density) {
   dim3 blockDim(16, 16);
   dim3 gridDim((width + blockDim.x - 1) / blockDim.x, (height + blockDim.y - 1) / blockDim.y);
@@ -111,5 +155,6 @@ void launchCUDAKernel(
       isEnabledSmoothing,
       alphaCoeff,
       isEnabledSinuidalColor,
+      isEnabledSuperSampling,
       density);
 }

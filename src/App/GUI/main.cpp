@@ -142,6 +142,15 @@ int launchWindow() {
             ImGui::InputDouble("Max X", &mandelbrotModel->maxY);
             ImGui::InputDouble("Min Y", &mandelbrotModel->minX);
             ImGui::InputDouble("Max Y", &mandelbrotModel->maxX);
+            ImGui::Text("X width: %3.15lf", mandelbrotModel->maxX - mandelbrotModel->minX);
+            ImGui::Text("Y width: %3.15lf", mandelbrotModel->maxY - mandelbrotModel->minY);
+            if (ImGui::Button("Adjust")) {
+              const float image_width = mandelbrotModel->getTexture()->getWidth();
+              const float image_height = mandelbrotModel->getTexture()->getHeight();
+              const double aspectRatio = image_height / image_width;
+              const double adjustHeight = aspectRatio * (mandelbrotModel->maxX - mandelbrotModel->minX);
+              mandelbrotModel->maxY = mandelbrotModel->minY + adjustHeight;
+            }
             ImGui::EndTabItem();
           }
 

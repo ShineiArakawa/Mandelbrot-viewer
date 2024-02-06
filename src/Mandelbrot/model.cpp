@@ -103,6 +103,7 @@ void MandelbrotModel::update() {
         isEnabledSmoothing,
         alphaCoeff,
         isEnabledSinuidalColor,
+        isEnabledSuperSampling,
         density);
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
   }
