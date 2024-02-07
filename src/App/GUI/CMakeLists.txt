@@ -20,6 +20,7 @@ target_include_directories(
     ${IMGUI_INCLUDE_DIR}
     ${STB_INCLUDE_DIR}
     ${ARGPARSE_INCLUDE_DIR}
+    ${L2DFD_INCLUDE_DIR}
     ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
 )
 

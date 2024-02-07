@@ -6,6 +6,7 @@ add_library(
     "GUI.cpp"
     "FileUtil.cpp"
     "CUDA.cpp"
+    "Image.cpp"
 )
 
 target_include_directories(

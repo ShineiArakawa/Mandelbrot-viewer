@@ -18,6 +18,7 @@ __global__ void kernel(
   const int indexX = threadIdx.x + blockIdx.x * blockDim.x;
   const int indexY = threadIdx.y + blockIdx.y * blockDim.y;
   const int offset = indexX + indexY * width;
+  const double thresholdSquared = threshold * threshold;
 
   if (indexX < width && indexY < height) {
     const double dX = (maxX - minX) / (double)(width - 1);
@@ -36,26 +37,28 @@ __global__ void kernel(
           const double coordX = (double)superSampleX * 2.0 * offsetX + centerCoordX - offsetX;
           const double coordY = (double)superSampleY * 2.0 * offsetY + centerCoordY - offsetY;
 
-          double iRadius = 0.0;
+          double iRadiusSquared = 0.0;
           int iStoppedIter = 0;
           double zReal = 0.0;
           double zImag = 0.0;
 
           for (int iter = 0; iter < maxIter; iter++) {
-            iRadius = sqrt(zReal * zReal + zImag * zImag);
+            const double zRealSquared = zReal * zReal;
+            const double zImagSquared = zImag * zImag;
+            iRadiusSquared = zRealSquared + zImagSquared;
 
-            if (iRadius > threshold) {
+            if (iRadiusSquared > thresholdSquared) {
               iStoppedIter = iter;
               break;
             }
 
-            const double tmp_zReal = zReal * zReal - zImag * zImag + coordX;
+            const double tmp_zReal = zRealSquared - zImagSquared + coordX;
             const double tmp_zImag = 2.0 * zReal * zImag + coordY;
             zReal = tmp_zReal;
             zImag = tmp_zImag;
           }
 
-          radius += iRadius;
+          radius += sqrt(iRadiusSquared);
           stoppedIter += iStoppedIter;
         }
       }
@@ -63,22 +66,27 @@ __global__ void kernel(
       radius /= 4.0;
       stoppedIter /= 4;
     } else {
+      double radiusSquared = 0.0;
       double zReal = 0.0;
       double zImag = 0.0;
 
       for (int iter = 0; iter < maxIter; iter++) {
-        radius = sqrt(zReal * zReal + zImag * zImag);
+        const double zRealSquared = zReal * zReal;
+        const double zImagSquared = zImag * zImag;
+        radiusSquared = zRealSquared + zImagSquared;
 
-        if (radius > threshold) {
+        if (radiusSquared > thresholdSquared) {
           stoppedIter = iter;
           break;
         }
 
-        const double tmp_zReal = zReal * zReal - zImag * zImag + centerCoordX;
+        const double tmp_zReal = zRealSquared - zImagSquared + centerCoordX;
         const double tmp_zImag = 2.0 * zReal * zImag + centerCoordY;
         zReal = tmp_zReal;
         zImag = tmp_zImag;
       }
+
+      radius = sqrt(radiusSquared);
     }
 
     int R, G, B, A = 0;

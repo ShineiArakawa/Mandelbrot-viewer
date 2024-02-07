@@ -1,7 +1,4 @@
 #include <App/GUI/GUIMain.hpp>
-#include <Common/FileUtil.hpp>
-#include <Common/GUI.hpp>
-#include <Mandelbrot/model.hpp>
 
 static bool isDragging = false;
 ImVec2 oldPos;
@@ -10,8 +7,12 @@ ImVec2 oldRangeX;
 ImVec2 oldRangeY;
 ImVec2 newRangeX;
 ImVec2 newRangeY;
+inline static char saveDirPath[256];
+inline static std::string imageSavedMessage = "";
 
 int main(int argc, char** argv) {
+  strcpy(saveDirPath, (char*)mandel::fs::FileUtil::cwd().c_str());
+
   // Parse args
   argparse::ArgumentParser program("Mandelbrot-viewer");
 
@@ -66,7 +67,7 @@ int offlineRender(argparse::ArgumentParser& parser) {
     mandelbrotModel->update();
 
     std::string filePath = mandel::fs::FileUtil::join(saveDir, std::to_string(iFrame) + ".png");
-    mandel::GUI::saveImage(mandelbrotModel->TEXTURE_BUFFER_WIDTH, mandelbrotModel->TEXTURE_BUFFER_HEIGHT, 4, mandelbrotModel->bytePixelsBuffer, filePath);
+    mandel::Image::saveImage(mandelbrotModel->TEXTURE_BUFFER_WIDTH, mandelbrotModel->TEXTURE_BUFFER_HEIGHT, 4, mandelbrotModel->bytePixelsBuffer, filePath);
   }
 
   return 0;
@@ -167,6 +168,28 @@ int launchWindow() {
             ImGui::InputDouble("Density", &mandelbrotModel->density);
             ImGui::Checkbox("Super Sample", &mandelbrotModel->isEnabledSuperSampling);
             ImGui::InputInt("Super Sample Factor", &mandelbrotModel->superSampleFactor);
+            ImGui::Checkbox("Dolly out", &mandelbrotModel->isEnabledDollyOut);
+            ImGui::InputDouble("Dolly out factor", &mandelbrotModel->dollyOutFactor);
+            ImGui::EndTabItem();
+          }
+
+          if (ImGui::BeginTabItem("Save")) {
+            ImGui::InputText("Save dir", saveDirPath, sizeof(saveDirPath));
+            if (ImGui::Button("Save current image")) {
+              std::string strSaveDirPath(saveDirPath);
+              if (mandel::fs::FileUtil::exists(strSaveDirPath)) {
+                std::string filePath = mandel::fs::FileUtil::join(strSaveDirPath, mandel::fs::FileUtil::getTimeStamp() + ".png");
+                mandelbrotModel->saveCurrentTexture(filePath);
+                imageSavedMessage = "Saved image to " + filePath;
+              } else {
+                imageSavedMessage = "Directory not found:" + strSaveDirPath;
+              }
+            }
+
+            if (imageSavedMessage.size() > 0) {
+              ImGui::Text(imageSavedMessage.c_str());
+            }
+
             ImGui::EndTabItem();
           }
 
@@ -174,9 +197,7 @@ int launchWindow() {
         }
         ImGui::EndChild();
 
-        ImGui::BeginChild("Setting2");
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::EndChild();
 
         ImGui::End();
       }

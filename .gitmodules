@@ -14,3 +14,9 @@
 [submodule "external/argparse"]
 	path = external/argparse
 	url = https://github.com/p-ranav/argparse.git
+[submodule "external/L2DFileDialog"]
+	path = external/L2DFileDialog
+	url = https://github.com/Limeoats/L2DFileDialog.git
+[submodule "external/ImGuiFileDialog"]
+	path = external/ImGuiFileDialog
+	url = https://github.com/aiekick/ImGuiFileDialog.git

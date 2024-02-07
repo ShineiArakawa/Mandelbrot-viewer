@@ -32,13 +32,15 @@ class MandelbrotModel {
   double maxX = 2.0;
   double minY = -2.0;
   double maxY = 2.0;
-  int maxIter = 100;
-  double threshold = 2.0;
+  int maxIter = 1000;
+  double threshold = 5.0;
   double alphaCoeff = 0.05;
   double density = 0.35;
   bool isEnabledSmoothing = false;
   bool isEnabledSinuidalColor = false;
   bool isEnabledSuperSampling = false;
+  double dollyOutFactor = 0.001;
+  bool isEnabledDollyOut = false;
   int superSampleFactor = 1;
   bool offlineMode = false;
   unsigned char* bytePixelsBuffer = (unsigned char*)calloc(sizeof(unsigned char), TEXTURE_BUFFER_WIDTH* TEXTURE_BUFFER_HEIGHT * 4);
@@ -50,6 +52,8 @@ class MandelbrotModel {
 
   // Mandelbrot calculation
   std::vector<double> arrange(const double, const double, const int);
+
+  void saveCurrentTexture(const std::string);
 };
 }  // namespace model
 }  // namespace mandel

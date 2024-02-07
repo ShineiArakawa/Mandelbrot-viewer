@@ -14,82 +14,36 @@ MandelbrotModel::~MandelbrotModel() {
 }
 
 void MandelbrotModel::update() {
-  // auto xCoords = arrange(minX, maxX, TEXTURE_BUFFER_WIDTH);
-  // auto yCoords = arrange(minY, maxY, TEXTURE_BUFFER_HEIGHT);
+  if (isEnabledDollyOut) {
+    const double deltaX = (maxX - minX) * dollyOutFactor;
+    const double deltaY = (maxY - minY) * dollyOutFactor;
+    minX = minX - deltaX;
+    minY = minY - deltaY;
+    maxX = maxX + deltaX;
+    maxY = maxY + deltaY;
 
-  // #pragma omp parallel for
-  //   for (int x = 0; x < (int)TEXTURE_BUFFER_WIDTH; x++) {
-  // #pragma omp parallel for
-  //     for (int y = 0; y < (int)TEXTURE_BUFFER_HEIGHT; y++) {
-  //       const std::complex<double> coord(xCoords[x], yCoords[y]);
-  //       std::complex<double> z(0.0, 0.0);
-
-  //       int stoppedIter = 0;
-  //       double radius = 0.0;
-
-  //       for (int iter = 0; iter < maxIter; iter++) {
-  //         radius = std::abs(z);
-
-  //         if (radius > threshold) {
-  //           stoppedIter = iter;
-  //           break;
-  //         }
-
-  //         z = z * z + coord;
-  //       }
-
-  //       if (stoppedIter < maxIter) {
-  //         double alpha = 0.0;
-  //         const int index = (x * TEXTURE_BUFFER_HEIGHT + y) * 4;
-
-  //         if (isEnabledSmoothing) {
-  //           const double nu = std::log(std::log(radius) / LOG2) / LOG2;
-  //           alpha = alphaCoeff * ((double)stoppedIter + 1.0 - nu);
-  //         } else {
-  //           alpha = alphaCoeff * (double)stoppedIter;
-  //         }
-
-  //         int R, G, B, A;
-
-  //         if (isEnabledSinuidalColor) {
-  //           alpha = alpha * density;
-  //           alpha = std::log(alpha + 1.0);
-
-  //           const double factorR = (std::cos((alpha * 2.0 - 1.0) * MY_PI) + 1.0) * 0.5;
-  //           const double factorG = (std::cos((alpha * 2.0 - 0.75) * MY_PI) + 1.0) * 0.5;
-  //           const double factorB = (std::cos((alpha * 2.0 - 0.5) * MY_PI) + 1.0) * 0.5;
-
-  //           R = (int)(factorR * 255.0);
-  //           G = (int)(factorG * 255.0);
-  //           B = (int)(factorB * 255.0);
-  //           A = 255;
-  //         } else {
-  //           const int pixelValue = std::max(std::min((int)(alpha * 255.0), 255), 0);
-  //           R = pixelValue;
-  //           G = pixelValue;
-  //           B = pixelValue;
-  //           A = 255;
-  //         }
-
-  //         bytePixelsBuffer[index] = R;
-  //         bytePixelsBuffer[index + 1] = G;
-  //         bytePixelsBuffer[index + 2] = B;
-  //         bytePixelsBuffer[index + 3] = A;
-  //       }
-  //     }
-  //   }
+    if (minX > maxX) {
+      minX = maxX;
+    }
+    if (minY > maxY) {
+      minY = maxY;
+    }
+  }
 
   cudaGraphicsResource* deviceResource = _textureBuffer->getDeviceResource();
 
   cudaArray* deviceArray;
   uchar4* cudaBitmap;
   {
+    // Turn on mapped OpenGL texture
     CUDA_CHECK_ERROR(cudaGraphicsMapResources(1, &deviceResource, nullptr));
-
+    // Get data as array
     CUDA_CHECK_ERROR(cudaGraphicsSubResourceGetMappedArray(&deviceArray, deviceResource, 0, 0));
+    // Malloc cuda memory
     CUDA_CHECK_ERROR(cudaMalloc((void**)&cudaBitmap, TEXTURE_BUFFER_WIDTH * TEXTURE_BUFFER_HEIGHT * sizeof(uchar4)));
   }
   {
+    // Launch the kernel and write data to cuda memory
     launchCUDAKernel(
         cudaBitmap,
         minY,
@@ -108,8 +62,11 @@ void MandelbrotModel::update() {
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
   }
   {
+    // Copy cuda memory to mapped OpenGL texture
     CUDA_CHECK_ERROR(cudaMemcpy2DToArray(deviceArray, 0, 0, cudaBitmap, TEXTURE_BUFFER_WIDTH * sizeof(uchar4), TEXTURE_BUFFER_WIDTH * sizeof(uchar4), TEXTURE_BUFFER_HEIGHT, cudaMemcpyDeviceToDevice));
+    // Discard cuda memory
     CUDA_CHECK_ERROR(cudaFree(cudaBitmap));
+    // Turn off mapped OpenGL texture
     CUDA_CHECK_ERROR(cudaGraphicsUnmapResources(1, &deviceResource, nullptr));
   }
 }
@@ -122,6 +79,12 @@ std::vector<double> MandelbrotModel::arrange(const double min, const double max,
     array.push_back(value);
   }
   return array;
+}
+
+void MandelbrotModel::saveCurrentTexture(const std::string filePath) {
+  unsigned char* bytesTexture = (unsigned char*)malloc(sizeof(unsigned char) * TEXTURE_BUFFER_WIDTH * TEXTURE_BUFFER_HEIGHT * 4);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytesTexture);
+  mandel::Image::saveImage(TEXTURE_BUFFER_WIDTH, TEXTURE_BUFFER_HEIGHT, 4, bytesTexture, filePath);
 }
 
 }  // namespace model

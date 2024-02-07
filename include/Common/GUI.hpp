@@ -17,16 +17,10 @@
 #include <imgui_internal.h>
 // clang-format on
 
-#define STB_IMAGE_STATIC
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_MSC_SECURE_CRT
-#define STB_IMAGE_WRITE_STATIC
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-
-#include <stb_image.h>
-#include <stb_image_write.h>
-
 #include <Common/CUDA.hpp>
+#include <Common/FileUtil.hpp>
+#include <Common/Image.hpp>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -54,9 +48,6 @@ class TextureBuffer {
   float getWidth() { return _width; };
   float getHeight() { return _height; };
 };
-
-unsigned char* loadTexture(const std::string& filePath, int& texWidth, int& texHeight);
-void saveImage(const int width, const int height, const int channels, unsigned char* bytes, const std::string filePath);
 
 }  // namespace GUI
 }  // namespace mandel

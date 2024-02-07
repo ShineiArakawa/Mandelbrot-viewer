@@ -75,8 +75,11 @@ set(
 # #### stb
 set(STB_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/stb)
 
-# #### stb
+# #### argparse
 set(ARGPARSE_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/argparse/include)
+
+# #### L2DFileDialog
+set(L2DFD_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/L2DFileDialog/L2DFileDialog/src)
 
 # #### Add subdirectory
 add_subdirectory("src")
@@ -120,4 +123,5 @@ message("#    IMGUI_SOURCE_DIR         : ${IMGUI_SOURCE_DIR}")
 message("#    IMGUI_BACKENDS_DIR       : ${IMGUI_BACKENDS_DIR}")
 message("#    STB_INCLUDE_DIR          : ${STB_INCLUDE_DIR}")
 message("#    ARGPARSE_INCLUDE_DIR     : ${ARGPARSE_INCLUDE_DIR}")
+message("#    L2DFD_INCLUDE_DIR        : ${L2DFD_INCLUDE_DIR}")
 message("# =======================================================================================================")

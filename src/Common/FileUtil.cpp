@@ -3,26 +3,38 @@
 namespace mandel {
 namespace fs {
 std::string FileUtil::join(const std::string basePath, const std::string additional) {
-  tPath path_basePath = generic_fs::absolute(tPath(basePath));
+  tPath path_basePath(basePath);
   return (path_basePath / tPath(additional)).string();
 }
 
 std::string FileUtil::absPath(const std::string path) { return generic_fs::absolute(tPath(path)).string(); }
 
-std::string FileUtil::dirPath(const std::string path) { return generic_fs::absolute(tPath(path)).parent_path().string(); }
+std::string FileUtil::dirPath(const std::string path) { return tPath(path).parent_path().string(); }
 
-std::string FileUtil::baseName(const std::string path) { return generic_fs::absolute(tPath(path)).filename().string(); }
+std::string FileUtil::baseName(const std::string path) { return tPath(path).filename().string(); }
 
 std::string FileUtil::extension(const std::string path) { return tPath(path).extension().string(); }
 
 std::string FileUtil::cwd() { return generic_fs::current_path().string(); }
 
+std::string FileUtil::getTimeStamp() {
+  const time_t t = time(NULL);
+  const tm *local = localtime(&t);
+
+  char buf[128];
+  strftime(buf, sizeof(buf), "%Y-%m-%d-%H-%M-%S", local);
+
+  std::string timeStamp(buf);
+
+  return timeStamp;
+}
+
 void FileUtil::mkdirs(const std::string path) {
-  tPath path_basePath = generic_fs::absolute(tPath(path));
+  tPath path_basePath = tPath(path);
   generic_fs::create_directories(path_basePath);
 }
 
-bool FileUtil::exists(const std::string path) { return generic_fs::exists(generic_fs::absolute(tPath(path))); }
+bool FileUtil::exists(const std::string path) { return generic_fs::exists(tPath(path)); }
 
 bool FileUtil::isAbsolute(const std::string path) { return tPath(path).is_absolute(); }
 

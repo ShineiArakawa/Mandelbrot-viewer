@@ -1,6 +1,10 @@
 #pragma once
 #ifndef __INCLUDE_GUI_MAIN_HPP__
 
+#include <Common/FileUtil.hpp>
+#include <Common/GUI.hpp>
+#include <Common/Image.hpp>
+#include <Mandelbrot/model.hpp>
 #include <argparse/argparse.hpp>
 #include <iostream>
 #include <memory>
