@@ -62,7 +62,6 @@ target_link_libraries(
     glfw
     OpenGL::GL
     OpenGL::GLU
-    stdc++fs
 )
 
 target_compile_options(${EXE_PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-gencode arch=compute_86,code=sm_86>)
