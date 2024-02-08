@@ -2,7 +2,6 @@
 
 namespace mandel {
 namespace model {
-static int counter = 0;
 MandelbrotModel::MandelbrotModel(bool offlineMode_) {
   offlineMode = offlineMode_;
   if (!offlineMode) {
@@ -58,6 +57,7 @@ void MandelbrotModel::update() {
         alphaCoeff,
         isEnabledSinuidalColor,
         isEnabledSuperSampling,
+        isVisibleAIM,
         density);
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
   }

@@ -170,6 +170,7 @@ int launchWindow() {
             ImGui::InputInt("Super Sample Factor", &mandelbrotModel->superSampleFactor);
             ImGui::Checkbox("Dolly out", &mandelbrotModel->isEnabledDollyOut);
             ImGui::InputDouble("Dolly out factor", &mandelbrotModel->dollyOutFactor);
+            ImGui::Checkbox("Render AIM", &mandelbrotModel->isVisibleAIM);
             ImGui::EndTabItem();
           }
 

@@ -17,6 +17,7 @@ __global__ void kernel(
     const double alphaCoeff,
     const bool isEnabledSinuidalColor,
     const bool isEnabledSuperSampling,
+    const bool isVisibleAIM,
     const double density);
 void launchCUDAKernel(uchar4* deviceArray,
     const double minX,
@@ -31,4 +32,5 @@ void launchCUDAKernel(uchar4* deviceArray,
     const double alphaCoeff,
     const bool isEnabledSinuidalColor,
     const bool isEnabledSuperSampling,
+    const bool isVisibleAIM,
     const double density);

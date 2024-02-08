@@ -42,6 +42,7 @@ class MandelbrotModel {
   double dollyOutFactor = 0.001;
   bool isEnabledDollyOut = false;
   int superSampleFactor = 1;
+  bool isVisibleAIM = false;
   bool offlineMode = false;
   unsigned char* bytePixelsBuffer = (unsigned char*)calloc(sizeof(unsigned char), TEXTURE_BUFFER_WIDTH* TEXTURE_BUFFER_HEIGHT * 4);
 
