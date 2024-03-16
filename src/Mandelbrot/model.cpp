@@ -1,7 +1,7 @@
 #include <Mandelbrot/model.hpp>
 
-namespace mandel {
-namespace model {
+
+namespace mandel::model {
 MandelbrotModel::MandelbrotModel(bool offlineMode_) {
   offlineMode = offlineMode_;
   if (!offlineMode) {
@@ -9,8 +9,7 @@ MandelbrotModel::MandelbrotModel(bool offlineMode_) {
   }
 }
 
-MandelbrotModel::~MandelbrotModel() {
-}
+MandelbrotModel::~MandelbrotModel() = default;
 
 void MandelbrotModel::update() {
   if (isEnabledDollyOut) {
@@ -81,11 +80,10 @@ std::vector<double> MandelbrotModel::arrange(const double min, const double max,
   return array;
 }
 
-void MandelbrotModel::saveCurrentTexture(const std::string filePath) {
-  unsigned char* bytesTexture = (unsigned char*)malloc(sizeof(unsigned char) * TEXTURE_BUFFER_WIDTH * TEXTURE_BUFFER_HEIGHT * 4);
+void MandelbrotModel::saveCurrentTexture(const std::string& filePath) {
+  auto* bytesTexture = (unsigned char*)malloc(sizeof(unsigned char) * TEXTURE_BUFFER_WIDTH * TEXTURE_BUFFER_HEIGHT * 4);
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytesTexture);
   mandel::Image::saveImage(TEXTURE_BUFFER_WIDTH, TEXTURE_BUFFER_HEIGHT, 4, bytesTexture, filePath);
 }
 
-}  // namespace model
-}  // namespace mandel
+} // namespace mandel::model

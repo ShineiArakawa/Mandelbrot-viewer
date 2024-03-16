@@ -54,7 +54,7 @@ class MandelbrotModel {
   // Mandelbrot calculation
   std::vector<double> arrange(const double, const double, const int);
 
-  void saveCurrentTexture(const std::string);
+  static void saveCurrentTexture(const std::string&);
 };
 }  // namespace model
 }  // namespace mandel

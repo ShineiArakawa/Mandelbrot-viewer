@@ -9,7 +9,7 @@ set(CMAKE_CUDA_FLAGS "-arch=sm_86")
 
 if(UNIX)
   set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall")
-  set(CMAKE_CUDA_FLAGS_DEBUG "-g -O0 -Wall")
+  set(CMAKE_CUDA_FLAGS_DEBUG "-g -O0")
   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
   set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG")
 elseif(WIN32)
